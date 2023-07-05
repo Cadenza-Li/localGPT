@@ -1,6 +1,6 @@
 # Natural Language Processing
-langchain==0.0.191
-chromadb==0.3.22
+langchain
+chromadb
 llama-cpp-python==0.1.48
 pdfminer.six==20221105
 InstructorEmbedding
@@ -23,3 +23,8 @@ requests
 
 # Excel File Manipulation
 openpyxl
+
+gradio
+Werkzeug
+torch
+pypdf

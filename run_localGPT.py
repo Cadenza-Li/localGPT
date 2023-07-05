@@ -139,7 +139,7 @@ def load_mpt():
 
     stop_token_ids = [
         tokenizer.convert_tokens_to_ids(x) for x in [
-            ['Human', ':'], ['AI', ':']
+            ['Human', ':'], ['AI', ':'], ['---'], ['-', '-', '-']
         ]
     ]
 
