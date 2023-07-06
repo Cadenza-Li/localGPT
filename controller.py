@@ -77,14 +77,12 @@ class Controller:
         docs = text_splitter.create_documents([texts])
         if len(docs) == 0:
             return 'Empty document.'
-        db = Chroma.from_documents(
-            docs,
-            self.embeddings,
+        self.db.add_documents(
+            documents=docs,
             persist_directory=PERSIST_DIRECTORY,
             client_settings=CHROMA_SETTINGS,
         )
-        db.persist()
-
+        self.db.persist()
         return 'Upload succeed.'
 
     @staticmethod

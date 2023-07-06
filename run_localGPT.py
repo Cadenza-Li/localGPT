@@ -139,7 +139,7 @@ def load_mpt():
 
     stop_token_ids = [
         tokenizer.convert_tokens_to_ids(x) for x in [
-            ['Human', ':'], ['AI', ':'], ['---'], ['-', '-', '-']
+            ['Human', ':'], ['AI', ':'], ['---'], ['.', 'Ċ', 'Ċ']   # '.ĊĊ' equals '.\n' in mpt
         ]
     ]
 
@@ -165,12 +165,6 @@ def load_mpt():
         top_k=0,  # select from top 0 tokens (because zero, relies on top_p)
         max_new_tokens=128,  # mex number of tokens to generate in the output
         repetition_penalty=1.1  # without this output begins repeating
-    )
-
-    # template for an instruction with no input
-    prompt = PromptTemplate(
-        input_variables=["instruction"],
-        template="{instruction}"
     )
 
     llm = HuggingFacePipeline(pipeline=generate_text)

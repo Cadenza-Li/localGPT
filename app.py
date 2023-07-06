@@ -25,7 +25,7 @@ def web():
 
             ### Chat with your private file.
             """)
-        with gr.Blocks():
+        with gr.Tab('ChatBot'):
             chatbot = gr.Chatbot()
             msg = gr.Textbox(label='input')
             gr.ClearButton([msg, chatbot])
@@ -37,7 +37,7 @@ def web():
 
             msg.submit(respond, [msg, chatbot], [msg, chatbot])
 
-        with gr.Blocks("File upload"):
+        with gr.Tab("File upload"):
             file_input = gr.File()
             file_output = gr.Textbox(label='result')
             file_button = gr.Button("Upload")
