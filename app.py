@@ -27,15 +27,20 @@ def web():
             """)
         with gr.Tab('ChatBot'):
             chatbot = gr.Chatbot()
+            inst = gr.Textbox(label='instruction')
             msg = gr.Textbox(label='input')
-            gr.ClearButton([msg, chatbot])
 
-            def respond(message, chat_history):
-                bot_message = controller.chat(message)
+            def respond(message, instruction, chat_history):
+                bot_message = controller.chat_with_api(message, instruction=instruction)
                 chat_history.append((message, bot_message))
                 return "", chat_history
 
-            msg.submit(respond, [msg, chatbot], [msg, chatbot])
+            msg.submit(respond, [msg, inst, chatbot], [msg, chatbot])
+
+            with gr.Row():
+                gr.ClearButton([msg, chatbot])
+                commit = gr.Button('commit')
+                commit.click(respond, [msg, inst, chatbot], [msg, chatbot])
 
         with gr.Tab("File upload"):
             file_input = gr.File()

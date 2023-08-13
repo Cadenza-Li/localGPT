@@ -7,6 +7,7 @@ from pathlib import Path
 from langchain.vectorstores import Chroma
 from langchain.chains import RetrievalQA
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from gradio_client import Client
 
 from langchain.embeddings import HuggingFaceInstructEmbeddings
 from constants import CHROMA_SETTINGS, EMBEDDING_MODEL_NAME, PERSIST_DIRECTORY
@@ -20,7 +21,7 @@ class Controller:
         logging.info(f"Running on: {device_type}")
 
         self.embeddings = HuggingFaceInstructEmbeddings(model_name=EMBEDDING_MODEL_NAME,
-                                                   model_kwargs={"device": device_type})
+                                                        model_kwargs={"device": device_type})
 
         # uncomment the following line if you used HuggingFaceEmbeddings in the ingest.py
         # embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL_NAME)
@@ -31,7 +32,7 @@ class Controller:
             embedding_function=self.embeddings,
             client_settings=CHROMA_SETTINGS,
         )
-        retriever = self.db.as_retriever()
+        self.retriever = self.db.as_retriever()
 
         # load the LLM for generating Natural Language responses
 
@@ -55,22 +56,52 @@ class Controller:
         # model_id = "TheBloke/WizardLM-7B-uncensored-GPTQ"
         # model_basename = "WizardLM-7B-uncensored-GPTQ-4bit-128g.compat.no-act-order.safetensors"
 
-        llm = load_mpt()
+        # llm = load_mpt()
+        #
+        # self.qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever,
+        #                                       return_source_documents=True)
 
-        self.qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever,
-                                              return_source_documents=True)
+        self.client = Client("https://sparticle-llama2-7b-chat-japanese-lora.hf.space/")
 
     def chat(self, content: str):
+        content = f"""
+        The following is a friendly conversation between a human and an AI. The AI is conversational but concise in its responses without rambling. If the AI does not know the answer to a question, it truthfully says it does not know.
+
+        Current conversation:
+        Human: {content}
+        AI:
+        """
         res = self.qa(content)
         answer, docs = res["result"], res["source_documents"]
 
         return answer
 
+    def chat_with_api(self, content: str, instruction: str = None):
+        docs = self.retriever.get_relevant_documents(content)
+
+        relevant_docs = ''
+        for doc in docs:
+            relevant_docs += doc.page_content
+
+        content = f'{content}relevant information is: {relevant_docs}'
+        print(content)
+        result = self.client.predict(
+            instruction,  # str in 'Instruction' Textbox component
+            content,  # str in 'Input' Textbox component
+            0.1,  # int | float (numeric value between 0 and 1) in 'Temperature' Slider component
+            0.75,  # int | float (numeric value between 0 and 1) in 'Top p' Slider component
+            40,  # int | float (numeric value between 0 and 100) in 'Top k' Slider component
+            4,  # int | float (numeric value between 1 and 4) in 'Beams' Slider component
+            128,  # int | float (numeric value between 1 and 1000) in 'Max tokens' Slider component
+            api_name="/predict"
+        )
+        return result
+
     def upload_file(self, file):
 
         text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=100,
-            chunk_overlap=20,
+            chunk_size=400,
+            chunk_overlap=100,
             length_function=len
         )
         texts = self.parse_file2str(file=file)

@@ -139,7 +139,7 @@ def load_mpt():
 
     stop_token_ids = [
         tokenizer.convert_tokens_to_ids(x) for x in [
-            ['Human', ':'], ['AI', ':'], ['---'], ['.', 'Ċ', 'Ċ']   # '.ĊĊ' equals '.\n' in mpt
+            ['Human', ':'], ['AI', ':'], ['---'], ['.', 'Ċ', 'Ċ'], ['ĠĊĊ'], ['ĊĊ']  # 'Ċ' is likely an empty space in MPT
         ]
     ]
 
